@@ -2,12 +2,14 @@ package main
 
 import "fmt"
 
+const prefixoPortugues = "Olá, "
+
 // dominio
-func Hello() string {
-	return "Olá, mundo"
+func Hello(name string) string {
+	return prefixoPortugues + name
 }
 
 // efeito colateral
 func main() {
-	fmt.Println(Hello())
+	fmt.Println(Hello("mundo"))
 }
