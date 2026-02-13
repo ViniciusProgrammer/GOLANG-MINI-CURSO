@@ -6,6 +6,10 @@ const prefixoPortugues = "Olá, "
 
 // dominio
 func Hello(name string) string {
+	if name == "" {
+		name = "Mundo"
+	}
+	
 	return prefixoPortugues + name
 }
 
