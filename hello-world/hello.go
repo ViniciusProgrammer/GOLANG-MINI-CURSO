@@ -1,10 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
-const prefixoPortugues = "Olá, "
+type HelloConfig struct {
+	Name   string
+	Hour   int
+	Region string
+}
 
-const(
+type HelloOption func(*HelloConfig)
+
+const (
 	RegionRN = "rn"
 	RegionSP = "sp"
 	RegionMG = "mg"
@@ -14,7 +23,7 @@ const(
 func getRegionalVocative(region string) string {
 	switch region {
 	case RegionRN:
-			return "boy"
+		return "boy"
 	case RegionSP:
 		return "mano"
 	case RegionMG:
@@ -23,7 +32,44 @@ func getRegionalVocative(region string) string {
 		return "tchê"
 	default:
 		return "" // sem vocativo regional
-	} 	
+	}
+}
+
+func WithName(name string) HelloOption {
+	return func(cfg *HelloConfig) {
+		cfg.Name = name
+	}
+}
+
+func WithHour(hour int) HelloOption {
+	return func(cfg *HelloConfig) {
+		cfg.Hour = hour
+	}
+}
+
+func WithRegion(region string) HelloOption {
+	return func(cfg *HelloConfig) {
+		cfg.Region = region
+	}
+}
+
+func HelloWithConfig(cfg HelloConfig) string {
+	if cfg.Name == "" {
+		cfg.Name = "Mundo"
+	}
+
+	if cfg.Hour <= 0 && cfg.Hour > 24 {
+		cfg.Hour = 12
+	}
+
+	greeting := getTimeGreeting(cfg.Hour)
+	vocative := getRegionalVocative(cfg.Region)
+
+	if vocative != "" {
+		return greeting + ", " + vocative
+	}
+
+	return greeting + ", " + cfg.Name
 }
 
 func HelloWithRegion(hour int, region string) string {
@@ -38,12 +84,42 @@ func HelloWithRegion(hour int, region string) string {
 }
 
 // dominio
-func Hello(name string) string {
-	if name == "" {
-		name = "Mundo"
+func Hello(options ...HelloOption) string {
+	cfg := HelloConfig{
+		Name:   "",
+		Hour:   0,
+		Region: "",
 	}
 
-	return prefixoPortugues + name
+	for _, option := range options {
+		option(&cfg)
+	}
+	
+	// limpa espaços em branco
+	cfg.Name = strings.TrimSpace(cfg.Name)
+
+	var greeting string
+
+	if cfg.Hour >= 1 && cfg.Hour <=  24 {
+		greeting = getTimeGreeting(cfg.Hour)
+	} else {
+		greeting = "Olá"
+	}
+
+	vocative := getRegionalVocative(cfg.Region)
+
+	// lógica de prioridade
+	// 1. Se tem nome não vazio -> usa nome
+	// 2. Se nome vazio mas tem vocativo -> usa vocativo
+	// 3. Se ambos vazios -> usa "Mundo"
+
+	if cfg.Name != "" {
+		return greeting + ", " + cfg.Name
+	} else if vocative != "" {
+		return greeting + ", " + vocative
+	} else {
+		return greeting + ", Mundo"
+	}
 }
 
 // Função de visibilidade privada quando começa com letra caixa baixa
@@ -68,5 +144,5 @@ func HelloWithTime(name string, hour int) string {
 
 // efeito colateral
 func main() {
-	fmt.Println(Hello("mundo"))
+	fmt.Println(Hello(WithName("mundo"), WithHour(14)))
 }
