@@ -4,7 +4,29 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"encoding/json"
 )
+
+func configurarRotas() *http.ServeMux {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/ajuda", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Endpoints disponíveis: /ping, /celsius, /calcular"))
+	})
+
+	mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		dados := map[string]interface{} {
+			"online": true,
+			"versao": "1.0",
+		}
+
+		json.NewEncoder(w).Encode(dados)
+	})
+	
+	return mux
+}
 
 func handlerPing(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))

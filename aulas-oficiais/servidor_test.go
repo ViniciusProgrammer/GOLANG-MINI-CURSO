@@ -6,6 +6,57 @@ import (
 	"testing"
 )
 
+func TestRotas(t *testing.T) {
+	mux := configurarRotas()
+
+	t.Run("raiz", func(t *testing.T) {
+		requisitado := httptest.NewRequest("GET", "/", nil)
+		recebido := httptest.NewRecorder()
+		mux.ServeHTTP(recebido, requisitado)
+
+		verificarBody(r, recebido, "Calculadora API")
+		verificarStatus(t, recebido, http.StatusOK)
+	})
+
+	t.Run("ajuda", func(t *testing.T) {
+		requisitado := httptest.NewRequest("GET", "/ajuda", nil) 
+		recebido := httptest.NewRecorder()
+		mux.ServeHTTP(recebido, requisitado)
+
+		verificarStatus(t, recebido, "disponiveis: /ping, /celsius, /calcular")
+	})
+
+	t.Run("status JSON", func(t *testing.T) {
+		requisitado := httptest.NewRequest("GET", "/status", nil)
+		recebido := httptest.NewRecorder()
+		mux.ServeHTTP(recebido, requisitado)
+
+		verificarStatus(t, recebido, http.StatusOK)
+
+		contentType := recebido.Header().Get("Content-Type")
+
+		if contentType != "application/json" {
+			t.Errorf("Content-Type: resultado %q, esperado: %q", contentType, "application")
+		}
+	})
+
+	t.Run("não encontrado", func(t *testing.T) {
+		requisitado := httptest.NewRequest("GET", "/xyz", nil)
+		recebido := httptest.NewRecorder()
+		mux.ServeHTTP(recebido, requisitado)
+
+		verificarStatus(t, recebido, http.StatusNotFound)
+	})
+}
+
+func verificarStatus(t testing.TB, recebido *httptest.ResponseRecorder, esperado int) {
+	t.Helper()
+
+	if recebido.Code != esperado {
+		t.Errorf("status: resultado %d, esperado %d", recebido.Code, esperado)
+	}
+}
+
 func TestHandlerPing(t *testing.T) {
 	requisitado := httptest.NewRequest("GET", "/ping", nil) // cria uma requisição falsa
 	recebido := httptest.NewRecorder()                      // grava o que vem de resposta
