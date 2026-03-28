@@ -14,7 +14,7 @@ func TestRotas(t *testing.T) {
 		recebido := httptest.NewRecorder()
 		mux.ServeHTTP(recebido, requisitado)
 
-		verificarBody(r, recebido, "Calculadora API")
+		verificarBody(t, recebido, "Calculadora API")
 		verificarStatus(t, recebido, http.StatusOK)
 	})
 
@@ -23,7 +23,8 @@ func TestRotas(t *testing.T) {
 		recebido := httptest.NewRecorder()
 		mux.ServeHTTP(recebido, requisitado)
 
-		verificarStatus(t, recebido, "disponiveis: /ping, /celsius, /calcular")
+		verificarStatus(t, recebido, http.StatusOK)
+		verificarBody(t, recebido, "disponiveis: /ping, /celsius, /calcular")
 	})
 
 	t.Run("status JSON", func(t *testing.T) {
